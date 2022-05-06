@@ -142,4 +142,13 @@ public class Main {
         }
         produtos = newMatrix;
     }
+
+    public static int procurarProduto(String identificador, Object[][] produtos){
+        for (int i = 0; i < produtos.length; i++){
+            if ((produtos[i][0].toString()).equals(identificador)){
+                return i;
+            }
+        }
+        return -1;
+    }
 }
