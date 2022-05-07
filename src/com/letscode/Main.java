@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static Object[][] produtos = new Object[5][9];
+    static Object[][] produtos = new Object[1][9];
     private static int indice = 0;
 
     public static void main(String[] args) {
@@ -29,8 +29,11 @@ public class Main {
         System.out.println("Bem vindo ao mercadinho!");
         String opcao;
         do{
+            System.out.println("\n-------------------------");
             System.out.println("Selecione a opção desejada:");
-            System.out.println("1 - Cadastrar/Comprar produtos \n2 - Imprimir estoque \n3 - Listar os produto pelo Tipo \n0 - Sair");
+            System.out.println("1 - Cadastrar/Comprar produtos \n2 - Imprimir estoque \n3 - Listar os produto pelo Tipo " +
+                    "\n4 - Pesquisar um produto pelo codigo \n5 - Pesquisar um produto pelo nome \n6 - Vendas" +
+                    "\n7 - Relatorio de vendas analitico, todas as vendas \n8 - Relatorios de vendas sintetico, consolidado por CPF \n0 - Sair");
             opcao = ler.nextLine();
 
             switch  (opcao) {
@@ -90,7 +93,68 @@ public class Main {
                             }
                         }
                     }
+                    break;
 
+                case "4":
+                    System.out.println("Digite o código do produto que deseja procurar:");
+                    String identificador = ler.nextLine();
+                    int i = procurarProduto(identificador, produtos);
+                    if(i==-1) {
+                        System.out.println("Produto não existe!");
+                    } else {
+                        for (int j = 0; j<9; j++) {
+                            System.out.print(produtos[i][j]+" |");
+                        }
+                    }
+                    break;
+
+                case "5":
+                    System.out.println("Digite o nome do produto que deseja procurar:");
+                    String pesquisa = ler.nextLine();
+                    boolean encontrou = false;
+                    for(int k =0; k<produtos.length; k++){
+                        if(produtos[k][3]!=null) {
+                            if(produtos[k][3].toString().contains(pesquisa)){
+                                System.out.println(produtos[k][3] + "código "+ produtos[k][0]);
+                                encontrou = true;
+                            }
+                        }
+                    }
+                    if (!encontrou) {
+                        System.out.println("Não foi encontrado produto com este nome!");
+                    }
+                    break;
+
+                case "6":
+                    Vendas.vender(produtos);
+                    break;
+
+                case "7":
+                    System.out.println(	"CPF | Tipo Cliente | Quantidade de Produtos | Valor Pago");
+                    for(int l=0;l<Vendas.matrizVendas.length;l++){
+                        for (int m=0; m<Vendas.matrizVendas[l].length;m++){
+                            System.out.print(Vendas.matrizVendas[l][m] +" |");
+                        }
+                        System.out.println();
+                    }
+                    break;
+
+                case "8":
+                    System.out.println(	"CPF | Quantidade de Produtos | Valor Pago");
+                    for(int i1=0; i1<Vendas.matrizCpf.length; i1++){
+                        Integer quantidadeTotal = 0;
+                        Double valorTotal = 0.0;
+
+                        for(int i2=0;i2<Vendas.matrizVendas.length;i2++){
+                            if((Vendas.matrizVendas[i2][0]!=null)&&(Vendas.matrizCpf[i1]!=null)) {
+                                if (Vendas.matrizVendas[i2][0].equals(Vendas.matrizCpf[i1])) {
+                                    quantidadeTotal += (Integer) Vendas.matrizVendas[i2][2];
+                                    valorTotal += (Double) Vendas.matrizVendas[i2][3];
+                                }
+                            }
+                        }
+                        System.out.println(Vendas.matrizCpf[i1]+" | "+ quantidadeTotal +" | "+valorTotal);
+                    }
                     break;
                 default:
                     System.out.println("Opcao invalida, tente novamente!");
@@ -128,7 +192,7 @@ public class Main {
             if (produtos[i][0] == null){
                 continue;
             }
-            if ((produtos[i][0]+produtos[i][1].toString()).equals(produto[0].toString()+produto[1].toString())){
+            if ((produtos[i][0].toString()).equals(produto[0].toString())){
                 return i;
             }
         }
@@ -141,5 +205,17 @@ public class Main {
             newMatrix[i] = produtos[i];
         }
         produtos = newMatrix;
+    }
+
+    public static int procurarProduto(String identificador, Object[][] produtos){
+
+        for (int i = 0; i < produtos.length; i++){
+            if (produtos[i][0] != null) {
+                if ((produtos[i][0].toString()).equals(identificador)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 }
