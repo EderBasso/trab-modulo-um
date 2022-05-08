@@ -3,8 +3,8 @@ package com.letscode;
 public enum TipoCliente {
     PF("Cliente PF", 0.0),
     PJ("Cliente PJ", 0.05),
-    VIP("Cliente VIP", 0.15),
-    COMUM ("Cliente sem cadastro", 0.0);
+    VIP("Cliente VIP", 0.15);
+
 
     TipoCliente(String descricao, double desconto){
         this.descricao = descricao;

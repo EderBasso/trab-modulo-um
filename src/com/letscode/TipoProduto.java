@@ -21,4 +21,13 @@ public enum TipoProduto {
     public double getMarkup(){
         return this.markup;
     }
+
+    public static boolean contemEnum(String tipo){
+        for (TipoProduto cadaTipo:TipoProduto.values()) {
+            if(cadaTipo.toString().equals(tipo)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

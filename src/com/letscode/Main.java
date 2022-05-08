@@ -1,6 +1,8 @@
 package com.letscode;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Main {
@@ -36,6 +38,7 @@ public class Main {
                     "\n7 - Relatorio de vendas analitico, todas as vendas \n8 - Relatorios de vendas sintetico, consolidado por CPF \n0 - Sair");
             opcao = ler.nextLine();
 
+
             switch  (opcao) {
                 case "0":
                     System.exit(0);
@@ -45,19 +48,45 @@ public class Main {
                     produto[0] = ler.nextLine();
                     System.out.println("Digite a marca do produto:");
                     produto[1] = ler.nextLine();
-                    System.out.println("Digite o tipo do produto (ALM, BEB, HIG):");
-                    produto[2] = TipoProduto.valueOf(ler.nextLine());
+                    String tipoProduto;
+                    do{
+                        System.out.println("Digite o tipo do produto (ALM, BEB, HIG):");
+                        tipoProduto = ler.nextLine();
+                    } while (!TipoProduto.contemEnum(tipoProduto));
+
+                    produto[2] = TipoProduto.valueOf(tipoProduto);
+
                     System.out.println("Digite o nome do produto:");
                     produto[3] = ler.nextLine();
-                    System.out.println("Digite o custo do produto:");
-                    produto[4] = Double.parseDouble(ler.nextLine());
-                    System.out.println("Digite a quantidade do produto:");
-                    produto[7] = Integer.parseInt(ler.nextLine());
+                    boolean continuarLoop = true;
+                    do{
+                        try {
+                            System.out.println("Digite o custo do produto:");
+                            produto[4] = Double.parseDouble(ler.nextLine());
+                            continuarLoop = false;
+                        }
+                        catch (Exception erro){
+                            System.out.println("Favor digitar um valor válido");
+                        }
+                    } while (continuarLoop||((Double)produto[4]<=0));
+
+                    continuarLoop = true;
+                    do{
+                        try {
+                            System.out.println("Digite a quantidade do produto:");
+                            produto[7] = Integer.parseInt(ler.nextLine());
+                            continuarLoop = false;
+                        }
+                        catch (Exception erro){
+                            System.out.println("Favor digitar um valor válido");
+                        }
+                    } while (continuarLoop||((Integer)produto[7]<0));
+
 
                     tipo = (TipoProduto)produto[2];
                     produto[5] = (Double)produto[4] * tipo.getMarkup();
                     produto[6] = (Integer)produto[7] + (Integer)produto[6];
-                    produto[8] = LocalDateTime.now();
+                    produto[8] = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
 
                     int verif = verificarProduto(produto);
                     if (verif == -1){
@@ -68,11 +97,12 @@ public class Main {
                     break;
                 case "2":
                     System.out.println("Estoque atual:");
-                    System.out.println("IDENTIFICADOR  --  MARCA  --  ESTOQUE");
+                    System.out.println("IDENTIFICADOR  --  MARCA  --  NOME  --  ESTOQUE");
                     for (int i = 0; i < produtos.length; i++) {
                     if (produtos[i][0]  != null){
                         System.out.printf((String)produtos[i][0]+"  --  "
                                         +(String)produtos[i][1]+"  --  "
+                                        +(String)produtos[i][3]+"  --  "
                                         +"%d \n"
                                 ,(Integer)produtos[i][6]);
                     }
@@ -115,7 +145,7 @@ public class Main {
                     for(int k =0; k<produtos.length; k++){
                         if(produtos[k][3]!=null) {
                             if(produtos[k][3].toString().contains(pesquisa)){
-                                System.out.println(produtos[k][3] + "código "+ produtos[k][0]);
+                                System.out.println(produtos[k][3] + " -- código "+ produtos[k][0]);
                                 encontrou = true;
                             }
                         }
@@ -130,34 +160,36 @@ public class Main {
                     break;
 
                 case "7":
-                    System.out.println(	"CPF | Tipo Cliente | Quantidade de Produtos | Valor Pago");
+                    System.out.println(	"CPF/CNPJ | Tipo Cliente | Quantidade de Produtos | Valor Pago");
                     for(int l=0;l<Vendas.matrizVendas.length;l++){
-                        for (int m=0; m<Vendas.matrizVendas[l].length;m++){
-                            System.out.print(Vendas.matrizVendas[l][m] +" |");
+                        if (Vendas.matrizVendas[l][0]  != null){
+                            System.out.printf("%s | %s | %d | %.2f \n", Vendas.matrizVendas[l][0],
+                                    Vendas.matrizVendas[l][1].toString(), Vendas.matrizVendas[l][2], Vendas.matrizVendas[l][3]);
                         }
-                        System.out.println();
                     }
                     break;
 
                 case "8":
-                    System.out.println(	"CPF | Quantidade de Produtos | Valor Pago");
-                    for(int i1=0; i1<Vendas.matrizCpf.length; i1++){
-                        Integer quantidadeTotal = 0;
-                        Double valorTotal = 0.0;
+                    System.out.println(	"CPF/CNPJ | Quantidade de Produtos | Valor Pago");
 
-                        for(int i2=0;i2<Vendas.matrizVendas.length;i2++){
-                            if((Vendas.matrizVendas[i2][0]!=null)&&(Vendas.matrizCpf[i1]!=null)) {
-                                if (Vendas.matrizVendas[i2][0].equals(Vendas.matrizCpf[i1])) {
-                                    quantidadeTotal += (Integer) Vendas.matrizVendas[i2][2];
-                                    valorTotal += (Double) Vendas.matrizVendas[i2][3];
+                    for(int i1=0; i1<Vendas.matrizCpf.length; i1++){
+                        if(Vendas.matrizCpf[i1]!=null) {
+                            Integer quantidadeTotal = 0;
+                            Double valorTotal = 0.0;
+
+                            for (int i2 = 0; i2 < Vendas.matrizVendas.length; i2++) {
+                                if ((Vendas.matrizVendas[i2][0] != null) && (Vendas.matrizCpf[i1] != null)) {
+                                    if (Vendas.matrizVendas[i2][0].equals(Vendas.matrizCpf[i1])) {
+                                        quantidadeTotal += (Integer) Vendas.matrizVendas[i2][2];
+                                        valorTotal += (Double) Vendas.matrizVendas[i2][3];
+                                    }
                                 }
                             }
+                            System.out.println(Vendas.matrizCpf[i1] + " | " + quantidadeTotal + " | " + valorTotal);
                         }
-                        System.out.println(Vendas.matrizCpf[i1]+" | "+ quantidadeTotal +" | "+valorTotal);
                     }
                     break;
-                default:
-                    System.out.println("Opcao invalida, tente novamente!");
+
             }
         }while (!opcao.equals(""));
 

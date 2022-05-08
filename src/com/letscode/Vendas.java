@@ -24,22 +24,54 @@ public class Vendas {
         TipoCliente tipoCliente = null;
         final String CPF_PADRAO = "000 000 001 91";
 
-        System.out.println("Deseja inserir o CPF do cliente? \n1 - Sim \n2 - Nao");
+        System.out.println("Deseja inserir o CPF/CNPJ do cliente? \n1 - Sim \n2 - Nao");
         String opcao = ler.nextLine();
         switch  (opcao) {
             case "1":
-                System.out.println("Digite o CPF do cliente:");
-                cpf = ler.nextLine();
-                System.out.println("Digite o tipo de cliente (PF, PJ, VIP):");
-                tipoCliente = TipoCliente.valueOf(ler.nextLine());
-                System.out.println(tipoCliente.getDescricao());
-                System.out.println(cpf);
+                do {
+                    System.out.println("Digite o CPF/CNPJ do cliente (apenas os algarismos):");
+                    cpf = ler.nextLine();
+                }  while((cpf.length()!=11)&&(cpf.length()!=14));
+
+                String opcaoCliente = "";
+
+                if (cpf.length()==11){
+                    do {
+                        System.out.println("Digite o tipo de cliente (1 - PF, 2- VIP):");
+                        opcaoCliente = ler.nextLine();
+                    } while (!opcaoCliente.equals("1") && !opcaoCliente.equals("2"));
+                    switch (opcaoCliente){
+                        case "1":
+                           tipoCliente = TipoCliente.PF;
+                           break;
+                        case "2":
+                            tipoCliente = TipoCliente.VIP;
+                            break;
+                     }
+                }
+                else if (cpf.length()==14){
+                   do{
+                       System.out.println("Digite o tipo de cliente (1 - PJ, 2- VIP):");
+                       opcaoCliente = ler.nextLine();
+                   } while (!opcaoCliente.equals("1") && !opcaoCliente.equals("2"));
+                       switch (opcaoCliente){
+                        case "1":
+                            tipoCliente = TipoCliente.PJ;
+                            break;
+                        case "2":
+                            tipoCliente = TipoCliente.VIP;
+                            break;
+                    }
+                }
+                else {
+                    System.out.println("Opcao invalida, tente novamente!");
+                }
+
                 break;
 
             case "2":
                 cpf = CPF_PADRAO;
-                System.out.println(cpf);
-                tipoCliente = TipoCliente.COMUM;
+                tipoCliente = TipoCliente.PF;
                 break;
         }
 
@@ -58,7 +90,7 @@ public class Vendas {
             System.out.println("Digite a quantidade do produto:");
             int quantidade = ler.nextInt();
             //vasculha matriz de estoque e encontra o nome, preco e atualiza estoque
-            int i = Main.procurarProduto(identificador, matrizTeste);
+            int i = Main.procurarProduto(identificador, Main.produtos);
             String nome = (String)produtos[i][3];
             double precoUnit = (Double)produtos[i][5];
             int estoqueAtual = (Integer)produtos[i][6];
@@ -72,7 +104,8 @@ public class Vendas {
                 quantidadeTotal += quantidade;
                 Main.produtos[i][6] = (Integer)Main.produtos[i][6]-quantidade;
 
-                String notaFiscalNova = notaFiscal + "\n" + identificador + " | " + nome + " | " + quantidade + " | " + precoUnit + " | " + preco;
+                String notaFiscalNova = notaFiscal + "\n" + identificador + " | " + nome + " | " + quantidade + " | "
+                        + String.format("%.2f",precoUnit) + " | " + String.format("%.2f", preco);
                 System.out.println(notaFiscalNova);
                 notaFiscal = notaFiscalNova;
             }
@@ -81,8 +114,8 @@ public class Vendas {
 
         precoTotal = precoTotal*(1- tipoCliente.getDesconto());
 
-        System.out.println("Quantidade de produtos "+quantidadeTotal+"\n"+"Valor total pago "+precoTotal);
-        System.out.println("CPF Cliente: "+cpf+"\n"+tipoCliente.getDescricao()+"\n Desconto de: "+tipoCliente.getDesconto()*100+"% aplicado");
+        System.out.printf("Quantidade de produtos "+quantidadeTotal+"\n"+"Valor total pago %.2f", precoTotal);
+        System.out.println("\nCPF/CNPJ Cliente: "+cpf+"\n"+tipoCliente.getDescricao()+"\nDesconto de: "+tipoCliente.getDesconto()*100+"% aplicado");
         adicionarVendas(cpf, tipoCliente, quantidadeTotal, precoTotal);
 
 
@@ -94,13 +127,14 @@ public class Vendas {
         if (indice == matrizVendas.length){
             redimensionar();
         }
-        matrizVendas[indice][0]=cpf;
-        matrizVendas[indice][1]= tipoCliente;
-        matrizVendas[indice][2]=quantidadeTotal;
-        matrizVendas[indice][3]=precoTotal;
-        indice++;
-        cadastroCpf(cpf);
-
+        if(precoTotal>0) {
+            matrizVendas[indice][0] = cpf;
+            matrizVendas[indice][1] = tipoCliente;
+            matrizVendas[indice][2] = quantidadeTotal;
+            matrizVendas[indice][3] = precoTotal;
+            indice++;
+            cadastroCpf(cpf);
+        }
     }
 
     public static void redimensionar(){
