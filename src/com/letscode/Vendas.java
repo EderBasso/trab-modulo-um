@@ -14,7 +14,7 @@ public class Vendas {
 
     public static void main(String[] args) {
 
-        vender(matrizTeste);
+        vender(matrizTeste); //ignorar- era para teste
     }
 
 
